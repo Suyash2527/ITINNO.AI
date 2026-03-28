@@ -1,0 +1,7 @@
+{
+  "name": "Itinno",
+  "description": "Plan Smarter. Travel Better. AI Smart Travel Planner.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

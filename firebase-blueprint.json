@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "Itinerary": {
+      "title": "Itinerary",
+      "description": "A saved travel itinerary",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who owns this itinerary"
+        },
+        "startingLocation": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        },
+        "budgetRs": {
+          "type": "number"
+        },
+        "language": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "When the itinerary was created"
+        }
+      },
+      "required": ["userId", "startingLocation", "destination", "budgetRs", "language"]
+    },
+    "CommunityPost": {
+      "title": "CommunityPost",
+      "description": "A post shared by a user in the community",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who created the post"
+        },
+        "authorName": {
+          "type": "string"
+        },
+        "authorPhoto": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "likesCount": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "When the post was created"
+        }
+      },
+      "required": ["userId", "authorName", "destination", "content", "likesCount"]
+    }
+  },
+  "firestore": {
+    "/itineraries/{itineraryId}": {
+      "schema": {
+        "$ref": "#/entities/Itinerary"
+      },
+      "description": "Saved itineraries for users"
+    },
+    "/community_posts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/CommunityPost"
+      },
+      "description": "Community posts"
+    }
+  }
+}

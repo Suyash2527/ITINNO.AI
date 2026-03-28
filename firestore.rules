@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidItinerary() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'startingLocation', 'destination', 'budgetRs', 'language', 'travelOptions', 'days']) &&
+             data.userId == request.auth.uid &&
+             data.startingLocation is string && data.startingLocation.size() > 0 && data.startingLocation.size() < 100 &&
+             data.destination is string && data.destination.size() > 0 && data.destination.size() < 100 &&
+             (data.budgetRs is number || data.budgetRs is string) &&
+             data.language is string && data.language.size() > 0 && data.language.size() < 50 &&
+             data.travelOptions is list &&
+             data.days is list;
+    }
+
+    function isValidCommunityPost() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'authorName', 'destination', 'content', 'likesCount']) &&
+             data.userId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() < 100 &&
+             data.destination is string && data.destination.size() > 0 && data.destination.size() < 100 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 5000 &&
+             data.likesCount is number && data.likesCount >= 0 &&
+             (!('authorPhoto' in data) || (data.authorPhoto is string && data.authorPhoto.size() < 1000));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /itineraries/{itineraryId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidItinerary();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidItinerary() && request.resource.data.userId == resource.data.userId;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /community_posts/{postId} {
+      allow read: if true; // Publicly readable
+      allow create: if isAuthenticated() && isValidCommunityPost();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidCommunityPost() && request.resource.data.userId == resource.data.userId;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+}
